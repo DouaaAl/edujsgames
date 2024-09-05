@@ -1,0 +1,87 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id              String            @id @default(uuid())
+  username        String
+  email           String?           @unique         
+  clerkId         String            @unique
+  plan            String            @default("Free")
+  warnings        Int               @default(0)
+  games           Game[]
+  timeConstraints TimeConstraint[]
+  subscriptions   Subscriptions[]
+
+  Notifications Notifications[]
+}
+enum CategoriesEnum {
+    ALL
+    RPG
+    ACTION
+    ADVENTURE
+    PUZZLE
+    STRATEGY
+    PLATFORM
+}
+
+model Game {
+  id       String  @id @default(uuid())
+  html     String?
+  css      String?
+  state    States
+  image    String @default("")
+  title     String @default("No Name")
+  plan     gamePlan @default(FREE)
+  category  CategoriesEnum? @default(ALL)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  javascript String?
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+
+enum gamePlan {
+  FREE
+  PAID
+}
+
+enum States {
+  APPROVED
+  PINDING
+  REJECTED
+  ARCHIVED
+}
+
+model TimeConstraint {
+  id       String       @id @default(uuid())
+  time     String?
+  userId   String
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscriptions {
+  id      String @id @default(uuid())
+  type    String
+  userId  String
+  customerId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notifications {
+  id      String @id @default(uuid())
+  type    States
+  message String?
+
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

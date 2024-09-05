@@ -1,0 +1,41 @@
+
+.codeMirrorWrapper {
+    min-height: 100px;
+    overflow: hidden;  
+  }
+ .CodeMirror {
+    font-family: 'Fira Code', monospace;
+    font-size: 20px;
+    height: 100%;
+    background-color: var(--light-purple);
+    color: var(--purple); 
+    padding: 10px; 
+    border-radius: 25px;
+  }
+
+  .CodeMirror:nth-child(1){
+    display: none;
+  }
+
+  .CodeMirror-gutters {
+    background-color: transparent;
+    height: 100%;
+  }
+  .CodeMirror-linenumber {
+    color: var(--purple);
+    font-size: 18px;
+    padding-right: 10px;
+    border-right: 1px solid var(--purple);
+  }
+  .CodeMirror-gutters {
+    display: flex;
+  }
+  
+
+  .CodeMirror-cursor {
+    border-left: 2px solid var(--purple); 
+  }
+  
+  .CodeMirror-lines {
+    padding: 4px; 
+  }

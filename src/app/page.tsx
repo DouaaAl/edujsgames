@@ -1,95 +1,87 @@
-import Image from "next/image";
+"use client"
 import styles from "./page.module.css";
+import Minigame from "@/components/minigame/minigame";
+import { useEffect, useState } from "react";
+import { getAllGamesServer } from "@/actions/games";
 
 export default function Home() {
+  const [games, setGames] = useState<any>([]);
+  const [allgames, setAllGames] = useState<any>([]);
+  const [filter, setFilter] = useState({
+    plan: "",
+    category: ""
+  });
+
+  const getGames = async() =>{
+    let result = await getAllGamesServer();
+    setGames(result);
+    setAllGames(result);
+  }
+  useEffect(()=>{
+    getGames()
+  }, [])
+
+  useEffect(()=>{
+    const newArray = allgames?.filter((game: any)=>{
+      return (filter.plan == "" || filter.plan == game.plan) && (filter.category == "" || filter.category == game.category || game.category == "ALL")
+    })
+    setGames(newArray);
+  },[filter])
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+      <article className={styles.sidebar}>
+        <h1 className={styles.logo}>Filters</h1>
+        <div className={styles.filter}>
+          <h3 className={styles.subTitle}>Game Categories</h3>
+          <article className="green">
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: ""}
+            })}>All</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "RPG"}
+            })}>RPG</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "ACTION"}
+            })}>Action</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "ADVENTURE"}
+            })}>Adventure</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "PUZZLE"}
+            })}>Puzzle</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "STRATEGY"}
+            })}>Strategy</span>
+            <span onClick={()=> setFilter((prev: any) =>{
+              return {...prev, category: "PLATFORM"}
+            })}>Platform</span>
+          </article>
         </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+        <div className={styles.filter}>
+          <h3 className={styles.subTitle}>Price</h3>
+          <article >
+          <span className={styles.yellow} onClick={()=> setFilter((prev: any) =>{
+              return {...prev, plan: ""}
+            })}>All</span>
+            <span className={styles.yellow} onClick={()=> setFilter((prev: any) =>{
+              return {...prev, plan: "PAID"}
+            })}>Subscribers</span>
+            <span className={styles.yellow} onClick={()=> setFilter((prev: any) =>{
+              return {...prev, plan: "FREE"}
+            })}>Free</span>
+          </article>
+        </div>
+      </article>
+      <section className="main">
+        <div className={styles.mainGrid}>
+        {
+            games?.map((game: any)=>{
+              return <Minigame userId={game.userId} category={game?.category} state={game.state} plan={game.plan} getGames={getGames} img={game.image} title={game.title} id={game.id} />
+            })
+          }
+        </div>
+      </section>
     </main>
   );
 }

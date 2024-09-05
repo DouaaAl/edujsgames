@@ -1,0 +1,130 @@
+.main {
+    background-color: #FFD166;
+    min-height: calc(100vh - 4rem);
+    height: fit-content;
+    padding: 6rem;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.title {
+    font-size: 4rem;
+    color: #118AB2;
+}
+
+.input {
+    margin: 4rem auto;
+    width: 65%;
+    padding: 17px;
+    border-radius: 32px;
+    outline: none;
+    border: none;
+    font-size: 27px;
+    color: var(--purple);
+}
+
+.usersGrid {
+    width: 65%;
+    margin: 0 auto;
+}
+
+.user {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    background-color: #FFF19A;
+    margin-bottom: 5rem;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+}
+
+.live {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.liveBtn{
+    width: 10px;
+    height: 10px;
+    background-color: var(--green);
+    border-radius: 50%;
+}
+
+.blue {
+    color: #118AB2;
+}
+
+.red{
+color: #b2117a;
+}
+
+.green {
+    color: #11b249;
+}
+
+@media screen and (max-width: 980px){
+    .main {
+        padding: 6rem 4rem;
+    }
+    
+    .input {
+        width: 100%;
+        padding: 10px;
+        font-size: 24px;
+    }
+    
+    .usersGrid {
+        width: 100%;
+    }
+       
+    .title {
+        font-size: 3.5rem;
+    }
+}
+
+@media screen and (max-width: 600px){
+    .main {
+        padding: 6rem 2rem;
+    }
+    
+    .input {
+        padding: 7px;
+        font-size: 20px;
+    }
+
+    .user h3 {
+        font-size: 14px;
+    }
+
+    .title {
+        font-size: 3rem;
+    }
+       
+}
+
+@media screen and (max-width: 540px){
+    .main {
+        padding: 6rem 10px;
+    }
+    
+    .title {
+        font-size: 2.5rem;
+    }
+       
+}
+
+@media screen and (max-width: 340px){
+    .main {
+        padding: 6rem 5px;
+    }
+    .user h3 {
+        font-size: 12px;
+    }
+       
+    .title {
+        font-size: 2rem;
+    }
+}

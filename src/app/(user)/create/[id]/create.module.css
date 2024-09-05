@@ -1,0 +1,84 @@
+.main {
+    display: grid;
+    grid-template-columns: 27% 73%;
+    min-height: calc(100vh - 4rem);
+}
+
+.sidebar{
+    background-color: #073B4C;
+    padding-top: 60px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebarWrapper,
+.codeBlock {
+    width: 90%;
+    color: white;
+}
+
+.codeBlock {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.codeBlock > textarea ,
+.codeBlock .codeMirrorWrapper{
+    width: 100%;
+    min-height: 110px;
+    border-radius: 25px;
+    margin-bottom: 2rem;
+    outline: none;
+    border: none;
+    padding: 20px;
+    font-size: 18px;
+}
+
+.btn {
+    display: block;
+    padding: 0.7rem 2rem;
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0 auto;
+    border-radius: 25px;
+    width: 80%;
+    color: var(--purple);
+    background-color: #FFDB86;
+    margin-bottom: 3rem;
+}
+
+.codePage {
+    height: 100%;
+    width: 100%;
+}
+
+.success {
+    font-size: 17px;
+    margin: 0 auto;
+    text-align: center;
+    color: var(--green);
+}
+
+@media screen and (max-width: 1100px){
+    .main {
+        grid-template-columns: 35% 65%;
+    }
+}
+
+@media screen and (max-width: 900px){
+    .main {
+        grid-template-columns: 45% 55%;
+    }
+}
+
+@media screen and (max-width: 800px){
+    .main {
+        grid-template-columns: 100%;
+    }
+
+    .codePage{
+        height: 100vh;
+    }
+}

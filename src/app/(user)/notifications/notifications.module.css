@@ -1,0 +1,48 @@
+.main {
+    background-color: #FFF19A;
+    padding: 4rem;
+    text-align: center;
+}
+
+.title {
+    font-size: 80px;
+    color: var(--dark-blue);
+    margin-bottom: 7rem;
+}
+
+.notifications article {
+    background-color: white;
+    width: 60%;
+    margin: 4rem auto;
+    display: flex;
+    gap: 1rem;
+    border-radius: 25px;
+    padding: 0 1rem 3rem 1rem;
+    align-items: center;
+    text-align: left;
+}
+
+.happy h1 {
+    font-size: 27px;
+    color: var(--green);
+}
+
+.sad h1,
+.content h1 {
+    font-size: 27px;
+    color: #EF476F;
+    margin-bottom: 20px;
+}
+
+.sad p,
+.content p{
+    font-weight: 700;
+}
+
+.sad p {
+    color: #BB65DA;
+}
+
+.content p {
+    color: #FF8688;
+}
