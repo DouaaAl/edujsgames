@@ -14,7 +14,6 @@ interface StripeEvent {
   };
   type: string;
 }
-
 export async function POST(req: Request): Promise<NextResponse> {
   const body = await req.text();
   const signature = headers().get('stripe-signature');
@@ -96,7 +95,7 @@ export async function POST(req: Request): Promise<NextResponse> {
                     id: subscriptionId, 
                     type: newPlan,   
                     userId: user.id,          
-                    customerId: subscriptionId 
+                    customerId: subscriptionId // Ensure this is the correct value
                   },
                 });
               }
