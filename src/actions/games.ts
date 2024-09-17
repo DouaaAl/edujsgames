@@ -89,8 +89,8 @@ export const uploadFiletoS3 = async (base64String: string, gameId: string) => {
             }
         }) 
         return response;
-    } catch (error) {
-        console.log(error);
+    } catch (e) {
+        console.log(e);
     }
 
     return fileBuffer;
