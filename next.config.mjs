@@ -1,8 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-      domains: ['edujsgames.s3.eu-north-1.amazonaws.com'],
-    },
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'edujsgames.s3.eu-north-1.amazonaws.com',
+          pathname: '/**',
+        },
+      ]    },
     experimental: {
       serverActions: {
         bodySizeLimit: '30mb',
