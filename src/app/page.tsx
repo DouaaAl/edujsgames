@@ -14,7 +14,9 @@ export default function Home() {
 
   const getGames = async() =>{
     let result = await getAllGamesServer();
-    setGames(result);
+    let approvedGames = result.filter(game => game.state === 'APPROVED');
+
+    setGames(approvedGames);
     setAllGames(result);
   }
   useEffect(()=>{
