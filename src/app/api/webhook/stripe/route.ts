@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import prisma from '@/db';
 
@@ -8,19 +7,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-interface StripeEvent {
-  data: {
-    object: any;
-  };
-  type: string;
-}
+export async function POST(req: NextRequest | any): Promise<NextResponse> {
+  // Retrieve raw body from middleware
+  const rawBody = await req.rawBody;
+  const signature = req.headers.get('stripe-signature');
 
-export async function POST(req: Request): Promise<NextResponse> {
-  const rawBody = await req.text();
-  const signature = headers().get('stripe-signature');
-
-  let event: StripeEvent;
-  let eventType: string;
+  let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature!, webhookSecret);
@@ -29,7 +21,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 
-  eventType = event.type;
+  const eventType = event.type;
 
   try {
     switch (eventType) {
