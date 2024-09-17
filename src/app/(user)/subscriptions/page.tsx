@@ -22,7 +22,7 @@ const Page = async () => {
   let user = await currentUser()
 
   if (!user) {
-    return redirect('/login')
+    return redirect('/sign-in')
   }
 
   return (
