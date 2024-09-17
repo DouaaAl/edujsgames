@@ -29,55 +29,77 @@ export async function POST(req) {
     try {
         switch (eventType) {
             case 'checkout.session.completed': {
-                let newPlan = 'PREMIUM';
-                if(priceId == "prod_Qj3tdTgeGwSXhb") newPlan = 'FREEMIUM';
+                console.log("payment completed");
+            
                 const session = await stripe.checkout.sessions.retrieve(
                     data.object.id,
                     {
-                        expand: ['line_items']
+                        expand: ['line_items', 'subscription'] 
                     }
                 );
+                
                 const customerId = session?.customer;
                 const customer = await stripe.customers.retrieve(customerId);
                 const priceId = session?.line_items?.data[0]?.price.id;
+            
+                let newPlan = 'PREMIUM';
+                if (priceId === "prod_Qj3tdTgeGwSXhb") {
+                    newPlan = 'FREEMIUM';
+                }
+            
                 const email = customer.email;
-                if(email){
+                if (email) {
                     const user = await prisma.user.findFirst({
-                        where:{
+                        where: {
                             email: email
                         }
-                    })
-                    if(user){
-                        const updateUser = await prisma.user.update({
+                    });
+            
+                    if (user) {
+                        await prisma.user.update({
                             where: {
                                 email: email
                             },
-                            data:{
+                            data: {
                                 plan: newPlan
                             }
-                        })
-                        const subscription = await prisma.subscriptions.findFirst({
-                            where: {
-                                userId: user.id
-                            }
-                        })
-                        if (subscription?.plan?.length > 1){
-                            await prisma.subscriptions.update({
-                                where:{
-                                    type: newPlan
-                                }
-                            })
-                        } else{
-                            await prisma.subscriptions.create({
-                                data: {
-                                    customerId: customerId,
-                                    type: newPlan,
+                        });
+            
+                        // Check if the session has a subscription and it's a valid string
+                        if (session.subscription && typeof session.subscription === 'string') {
+                            // Retrieve the subscription details from Stripe
+                            const subscription = await stripe.subscriptions.retrieve(session.subscription);
+                            const subscriptionId = subscription.id;
+            
+                            // Update or create the subscription in your database
+                            const existingSubscription = await prisma.subscriptions.findFirst({
+                                where: {
                                     userId: user.id
                                 }
-                            })
+                            });
+            
+                            if (existingSubscription?.plan?.length > 1) {
+                                await prisma.subscriptions.update({
+                                    where: {
+                                        customerId: subscriptionId
+                                    },
+                                    data: {
+                                        type: newPlan
+                                    }
+                                });
+                            } else {
+                                await prisma.subscriptions.create({
+                                    data: {
+                                        customerId: subscriptionId,
+                                        type: newPlan,
+                                        userId: user.id
+                                    }
+                                });
+                            }
                         }
                     }
                 }
+                break;  // Ensure you add a break to exit the case
             }
 
             case 'customer.subscription.deleted': {
