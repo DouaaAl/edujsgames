@@ -34,4 +34,4 @@ The architecture diagram illustrates the flow of data through the application, s
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/game-sharing-platform.git
+git clone https://github.com/DouaaAl/edujsgames
