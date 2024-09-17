@@ -1,20 +1,12 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers'; // For getting request headers
+import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import prisma from '@/db';
 
-// Initialize Stripe with the secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20', // Ensure the API version matches your needs
+  apiVersion: '2024-06-20',
 });
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
-// Disable body parsing to handle raw request bodies for Stripe
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 interface StripeEvent {
   data: {
@@ -24,14 +16,13 @@ interface StripeEvent {
 }
 
 export async function POST(req: Request): Promise<NextResponse> {
-  const rawBody = await req.text(); // Get the raw body for signature verification
-  const signature = headers().get('stripe-signature'); // Get Stripe signature header
+  const rawBody = await req.text();
+  const signature = headers().get('stripe-signature');
 
   let event: StripeEvent;
   let eventType: string;
 
   try {
-    // Verify the Stripe signature and construct the event
     event = stripe.webhooks.constructEvent(rawBody, signature!, webhookSecret);
   } catch (err: any) {
     console.error(`Webhook signature verification failed. ${err.message}`);
@@ -41,7 +32,6 @@ export async function POST(req: Request): Promise<NextResponse> {
   eventType = event.type;
 
   try {
-    // Handle different event types
     switch (eventType) {
       case 'checkout.session.completed': {
         console.log('Payment completed');
