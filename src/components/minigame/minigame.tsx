@@ -85,7 +85,7 @@ const minigame = ({img, title, id, getGames, plan, state, category, userId}:imag
       await getGames();
       
     } catch (error) {
-      console.error('Error processing the file:', error);
+      console.error('Error :', error);
     }
     setIsChange(false);
   };
