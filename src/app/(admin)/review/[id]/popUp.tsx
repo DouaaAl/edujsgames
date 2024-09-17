@@ -4,8 +4,7 @@ import styles from "./review.module.css";
 import { States } from '@prisma/client';
 import { changeGameStateServer } from '@/actions/games';
 import Image from 'next/image';
-import socket, { logInUserSocket } from '@/actions/socket';
-import { getUserIdServer } from '@/actions/users';
+import socket from '@/actions/socket';
 
 interface PopUpProps {
     state: States | "";

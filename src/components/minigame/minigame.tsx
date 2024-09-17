@@ -71,7 +71,7 @@ const minigame = ({img, title, id, getGames, plan, state, category, userId}:imag
         const result = await changeGameInfoServer({id, newname});
       }
       if(categoryState) {
-        const result = await changeGameCategory({gameId: id, category: categoryState})
+        const result = await changeGameCategory({gameId: id, category: categoryState as CategoriesEnum})
       }
       
       if(planState !== plan){

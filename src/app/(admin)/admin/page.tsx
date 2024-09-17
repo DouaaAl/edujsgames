@@ -1,7 +1,7 @@
 "use client"
 import React, {useState, useEffect} from 'react'
 import styles from "./admin.module.css"
-import { getAllGamesServer, getAllGamesStateServer } from '@/actions/games';
+import { getAllGamesStateServer } from '@/actions/games';
 import { getAllUsersServer } from '@/actions/users';
 import socket from '@/actions/socket';
 

@@ -57,7 +57,7 @@ const page = () => {
         <div className={styles.mainGrid}>
           {
             games?.map((game: any)=>{
-              return <Minigame category={game.category} state={game.state} plan={game.plan} getGames={getGames} img={game.image} title={game.title} id={game.id} />
+              return <Minigame userId={game.userId} category={game.category} state={game.state} plan={game.plan} getGames={getGames} img={game.image} title={game.title} id={game.id} />
             })
           }
         </div>

@@ -1,10 +1,10 @@
 "use server"
 import prisma from '@/db';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { currentUser } from '@clerk/nextjs/server';
-import { States, Categories, gamePlan } from '@prisma/client';
+import { States, CategoriesEnum , gamePlan } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import sharp from 'sharp';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -222,7 +222,7 @@ export const getUsersGamesServer = async(userId: string | string[])=>{
 
 interface newGameCat {
     gameId: string;
-    category: Categories 
+    category: CategoriesEnum 
 }
 
 export const changeGameCategory = async({gameId, category}: newGameCat) =>{
