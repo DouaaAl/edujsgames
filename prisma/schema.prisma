@@ -71,10 +71,15 @@ model TimeConstraint {
 
 model Subscriptions {
   id      String @id @default(uuid())
-  type    String
-  userId  String
-  customerId String
+  type    SubscriptionType
+  userId  String @unique
+  customerId String @unique
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum SubscriptionType {
+   PREMIUM
+   FREEMIUM
 }
 
 model Notifications {

@@ -77,14 +77,14 @@ export async function POST(req: Request): Promise<NextResponse> {
               // Retrieve the subscription from the database using the subscriptionId
               const existingSubscription = await prisma.subscriptions.findUnique({
                 where: {
-                  id: subscriptionId,
+                  id: subscriptionId, // Ensure this matches the Prisma schema
                 },
               });
 
               if (existingSubscription) {
                 await prisma.subscriptions.update({
                   where: {
-                    id: subscriptionId,
+                    id: subscriptionId, // Ensure this matches the Prisma schema
                   },
                   data: {
                     type: newPlan,
@@ -93,16 +93,17 @@ export async function POST(req: Request): Promise<NextResponse> {
               } else {
                 await prisma.subscriptions.create({
                   data: {
-                    customerId: subscriptionId, // Assuming customerId field exists in your model
-                    type: newPlan,
-                    userId: user.id,
+                    id: subscriptionId, 
+                    type: newPlan,   
+                    userId: user.id,          
+                    customerId: subscriptionId 
                   },
                 });
               }
             }
           }
         }
-        break; // Ensure you add a break to exit the case
+        break; 
       }
 
       case 'customer.subscription.deleted': {
@@ -114,7 +115,7 @@ export async function POST(req: Request): Promise<NextResponse> {
         // Delete the subscription using the subscriptionId
         const userSubscription = await prisma.subscriptions.delete({
           where: {
-            id: subscriptionId,
+            id: subscriptionId, // Ensure this matches the Prisma schema
           },
         });
 
