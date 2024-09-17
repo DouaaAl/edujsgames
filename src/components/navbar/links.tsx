@@ -31,7 +31,6 @@ const links = () => {
   return (
     <ul>
     <li>
-      <a href="profile">Profile</a>
       <a href="subscriptions">Subscriptions</a>
       <a href="/mygames">MyGames</a>
       {(role == 'admin') && <a href="/admin">Admin</a>}
