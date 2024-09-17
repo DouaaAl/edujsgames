@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import prisma from '@/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20', // Specify the API version if needed
+  apiVersion: '2024-06-20',
 });
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -14,32 +14,35 @@ interface StripeEvent {
   };
   type: string;
 }
+
 export async function POST(req: Request): Promise<NextResponse> {
   const body = await req.text();
   const signature = headers().get('stripe-signature');
 
-  let event: StripeEvent;
-  let eventType: string;
-
-  try {
-    event = stripe.webhooks.constructEvent(body, signature!, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed. ${err.message}`);
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  if (!signature) {
+    console.error('Missing Stripe signature');
+    return NextResponse.json({ error: 'Missing Stripe signature' }, { status: 400 });
   }
 
-  eventType = event.type;
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err: any) {
+    console.error(`Webhook signature verification failed: ${err.message}`);
+    return NextResponse.json({ error: `Webhook signature verification failed: ${err.message}` }, { status: 400 });
+  }
+
+  const eventType = event.type;
 
   try {
     switch (eventType) {
       case 'checkout.session.completed': {
         console.log('Payment completed');
-        
+
         const session = await stripe.checkout.sessions.retrieve(
           event.data.object.id,
-          {
-            expand: ['line_items', 'subscription'],
-          }
+          { expand: ['line_items', 'subscription'] }
         );
 
         const customerId = session?.customer as string | undefined;
@@ -50,96 +53,72 @@ export async function POST(req: Request): Promise<NextResponse> {
         if (priceId === 'prod_Qj3tdTgeGwSXhb') {
           newPlan = 'FREEMIUM';
         }
+
         const email = customer?.email;
         if (email) {
           const user = await prisma.user.findFirst({
-            where: {
-              email: email,
-            },
+            where: { email },
           });
-          
+
           if (user) {
-            console.log("user :", user);
-            let updatedUser =await prisma.user.update({
-              where: {
-                email: email,
-              },
-              data: {
-                plan: newPlan,
-              },
+            console.log('User:', user);
+
+            const updatedUser = await prisma.user.update({
+              where: { email },
+              data: { plan: newPlan },
             });
-            console.log("updated User :", updatedUser);
+            console.log('Updated User:', updatedUser);
 
             if (session.subscription && typeof session.subscription === 'string') {
               const subscription = await stripe.subscriptions.retrieve(session.subscription);
               const subscriptionId = subscription.id;
 
-              // Retrieve the subscription from the database using the subscriptionId
               const existingSubscription = await prisma.subscriptions.findUnique({
-                where: {
-                  id: subscriptionId, // Ensure this matches the Prisma schema
-                },
+                where: { id: subscriptionId },
               });
 
               if (existingSubscription) {
                 await prisma.subscriptions.update({
-                  where: {
-                    id: subscriptionId, // Ensure this matches the Prisma schema
-                  },
-                  data: {
-                    type: newPlan,
-                  },
+                  where: { id: subscriptionId },
+                  data: { type: newPlan },
                 });
               } else {
                 await prisma.subscriptions.create({
                   data: {
-                    id: subscriptionId, 
-                    type: newPlan,   
-                    userId: user.id,          
-                    customerId: subscriptionId // Ensure this is the correct value
+                    id: subscriptionId,
+                    type: newPlan,
+                    userId: user.id,
+                    customerId: subscription.customer as string, // Use customer ID for customerId
                   },
                 });
               }
             }
           }
         }
-        break; 
+        break;
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = await stripe.subscriptions.retrieve(
-          event.data.object.id
-        );
-        const subscriptionId = subscription.id;
+        const subscriptionId = event.data.object.id;
 
-        // Delete the subscription using the subscriptionId
         const userSubscription = await prisma.subscriptions.delete({
-          where: {
-            id: subscriptionId, // Ensure this matches the Prisma schema
-          },
+          where: { id: subscriptionId },
         });
 
         await prisma.user.update({
-          where: {
-            id: userSubscription.userId,
-          },
-          data: {
-            plan: 'FREE',
-          },
+          where: { id: userSubscription.userId },
+          data: { plan: 'FREE' },
         });
 
         break;
       }
 
       default:
-        // Unhandled event type
         console.warn(`Unhandled event type: ${eventType}`);
     }
   } catch (e: any) {
-    console.error(
-      `Stripe error: ${e.message} | EVENT TYPE: ${eventType}`
-    );
+    console.error(`Stripe error: ${e.message} | EVENT TYPE: ${eventType}`);
   }
 
-  return NextResponse.json({});
+  return NextResponse.json({ received: true });
 }
