@@ -32,6 +32,4 @@ The architecture diagram illustrates the flow of data through the application, s
 ## Getting Started
 
 1. **Clone the Repository:**
-
-   ```bash
-git clone https://github.com/DouaaAl/edujsgames
+```bash git clone https://github.com/DouaaAl/edujsgames
