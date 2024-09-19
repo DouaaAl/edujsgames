@@ -101,7 +101,7 @@ const minigame = ({img, title, id, getGames, plan, state, category, userId}:imag
       alt="first website"
     />
     </a>
-    {(isUser || isAdmin) && <a href={`create/${id}`}>
+    {(isUser || isAdmin) && <a href={`/create/${id}`}>
            <Image 
       src="/code.png"
       width={30}

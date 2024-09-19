@@ -10,6 +10,8 @@ import { Controlled as ControlledEditor} from 'react-codemirror2'
 import "./customize.css"
 import { changeGameStateServer, getGameServer, updateGameServer } from '@/actions/games'
 import { useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { getUserMetaDataServer } from '@/actions/users'
 
 const page = () => {
 
@@ -18,7 +20,16 @@ const page = () => {
   const [javascript, setJavascript] = useState('');
   const [success, setSuccess] = useState(false);
   const id = useParams().id;
+  const router = useRouter();
 
+  const checkPermissions = async() =>{
+    const role = await getUserMetaDataServer();
+    if (role == "admin"){
+      router.push("/review/"+ id);
+    }
+  }
+
+  checkPermissions();
   const updateGame = async()=>{
     let change = await updateGameServer({html, css, javascript, id});
     console.log(change);
@@ -40,6 +51,7 @@ const page = () => {
     
   }
   useEffect(()=>{
+    
     getCurrentGame();
   }, [])
 

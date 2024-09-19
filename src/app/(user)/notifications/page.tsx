@@ -3,12 +3,14 @@ import React, {useState, useEffect} from 'react'
 import styles from "./notifications.module.css"
 import Image from 'next/image'
 import { getNotificationsServer } from '@/actions/notifications'
+import { useRouter } from 'next/navigation'
 
 const page = () => {
   const [notifications, setNotifications] = useState<any>([]);
+  const router = useRouter();
 
   const getNotifications = async() =>{
-    let result = await getNotificationsServer();
+    let result: any = await getNotificationsServer();
     setNotifications(result);
   }
 

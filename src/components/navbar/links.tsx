@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import styles from "./navbar.module.css"
 import Image from 'next/image'
 import socket, { logInUserSocket } from '@/actions/socket'
-import { useUser } from '@clerk/nextjs';
 import { getUserMetaDataServer } from '@/actions/users'
 
 
@@ -31,7 +30,7 @@ const links = () => {
   return (
     <ul>
     <li>
-      <a href="subscriptions">Subscriptions</a>
+      <a href="/subscriptions">Subscriptions</a>
       <a href="/mygames">MyGames</a>
       {(role == 'admin') && <a href="/admin">Admin</a>}
     <SignedOut>

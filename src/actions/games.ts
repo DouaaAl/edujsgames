@@ -22,7 +22,6 @@ const loggedInUser = await prisma.user.findFirst({
             state: "ARCHIVED"
         }
     })
-    console.log(newGame);
 
     return redirect(`/create/${newGame.id}`);
 }
@@ -168,6 +167,9 @@ export const changeGameInfoServer = async({id, newname}: updateGameInfo) =>{
 
 export const getCurrentUserGamesServer = async() =>{
     const user = await currentUser();
+    if(!user?.id){
+        redirect("/sign-in");
+    }
     const loggedInUser = await prisma.user.findFirst({
     where:{
         clerkId: user?.id
