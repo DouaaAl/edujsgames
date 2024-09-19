@@ -1,128 +1,134 @@
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 import Stripe from 'stripe';
-import { Readable } from 'stream';
 import prisma from '@/db';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: '2024-06-20', // Specify your API version
 });
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
-// Helper function to convert the request stream to a buffer
-async function buffer(readable: Readable): Promise<Buffer> {
-  const chunks: Uint8Array[] = [];
-  for await (const chunk of readable) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-}
+export async function POST(req: Request) {
+    const body = await req.text();
+    const signature = headers().get('stripe-signature');
 
-// Handling the webhook event
-export async function POST(req: Request): Promise<NextResponse> {
-  const body = await buffer(req.body as any);
-  const signature = req.headers.get('stripe-signature');
+    let data: any;
+    let eventType: string;
+    let event: any;
 
-  if (!signature) {
-    console.error('Missing Stripe signature');
-    return NextResponse.json({ error: 'Missing Stripe signature' }, { status: 400 });
-  }
-
-  let event: Stripe.Event;
-
-  try {
-    // Validate the webhook signature using the raw body and secret
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ error: `Webhook signature verification failed: ${err.message}` }, { status: 400 });
-  }
-
-  const eventType = event.type;
-
-  try {
-    switch (eventType) {
-      case 'checkout.session.completed': {
-        console.log('Payment completed');
-        
-        const session = await stripe.checkout.sessions.retrieve(
-          event.data.object.id,
-          { expand: ['line_items', 'subscription'] }
-        );
-        
-        const customerId = session?.customer as string | undefined;
-        const customer: any = customerId ? await stripe.customers.retrieve(customerId) : null;
-        const priceId = session?.line_items?.data[0]?.price?.id;
-
-        let newPlan: 'PREMIUM' | 'FREEMIUM' = 'PREMIUM';
-        if (priceId === 'prod_Qj3tdTgeGwSXhb') {
-          newPlan = 'FREEMIUM';
-        }
-
-        const email = customer?.email;
-        if (email) {
-          const user = await prisma.user.findFirst({
-            where: { email },
-          });
-
-          if (user) {
-            console.log('User:', user);
-
-            const updatedUser = await prisma.user.update({
-              where: { email },
-              data: { plan: newPlan },
-            });
-            console.log('Updated User:', updatedUser);
-
-            if (session.subscription && typeof session.subscription === 'string') {
-              const subscription = await stripe.subscriptions.retrieve(session.subscription);
-              const subscriptionId = subscription.id;
-
-              const existingSubscription = await prisma.subscriptions.findUnique({
-                where: { id: subscriptionId },
-              });
-
-              if (existingSubscription) {
-                await prisma.subscriptions.update({
-                  where: { id: subscriptionId },
-                  data: { type: newPlan },
-                });
-              } else {
-                await prisma.subscriptions.create({
-                  data: {
-                    id: subscriptionId,
-                    type: newPlan,
-                    userId: user.id,
-                    customerId: subscription.customer as string, // Use customer ID for customerId
-                  },
-                });
-              }
-            }
-          }
-        }
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscriptionId = event.data.object.id;
-
-        const userSubscription = await prisma.subscriptions.delete({
-          where: { id: subscriptionId },
-        });
-
-        await prisma.user.update({
-          where: { id: userSubscription.userId },
-          data: { plan: 'FREE' },
-        });
-
-        break;
-      }
-
-      default:
-        console.warn(`Unhandled event type: ${eventType}`);
+    try {
+        event = stripe.webhooks.constructEvent(body, signature as string, webhookSecret);
+    } catch (err: any) {
+        console.error(`Webhook signature verification failed. ${err.message}`);
+        return NextResponse.json({ error: err.message }, { status: 400 });
     }
-  } catch (e: any) {
-    console.error(`Stripe error: ${e.message} | EVENT TYPE: ${eventType}`);
-  }
 
-  return NextResponse.json({ received: true });
+    data = event.data;
+    eventType = event.type;
+
+    try {
+        switch (eventType) {
+            case 'checkout.session.completed': {
+                console.log("Payment completed");
+
+                const session: any = await stripe.checkout.sessions.retrieve(
+                    data.object.id as string,
+                    {
+                        expand: ['line_items', 'subscription'] // Expand to include subscription if it exists
+                    }
+                );
+
+                const customerId = session.customer as string;
+                const customer: any = await stripe.customers.retrieve(customerId);
+                const priceId: any = session.line_items?.data[0]?.price.id as string;
+
+                let newPlan: 'PREMIUM' | 'FREEMIUM' = 'PREMIUM';
+                if (priceId === "prod_Qj3tdTgeGwSXhb") {
+                    newPlan = 'FREEMIUM';
+                }
+
+                const email = customer.email;
+                if (email) {
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            email: email
+                        }
+                    });
+
+                    if (user) {
+                        await prisma.user.update({
+                            where: {
+                                email: email
+                            },
+                            data: {
+                                plan: newPlan
+                            }
+                        });
+
+                        // Check if the session has a subscription and it's a valid string
+                        if (session.subscription && typeof session.subscription === 'string') {
+                            // Retrieve the subscription details from Stripe
+                            const subscription = await stripe.subscriptions.retrieve(session.subscription);
+                            const subscriptionId = subscription.id;
+
+                            // Update or create the subscription in your database
+                            const existingSubscription: any = await prisma.subscriptions.findFirst({
+                                where: {
+                                    userId: user.id
+                                }
+                            });
+
+                            if (existingSubscription?.plan?.length > 1) {
+                                await prisma.subscriptions.update({
+                                    where: {
+                                        customerId: subscriptionId
+                                    },
+                                    data: {
+                                        type: newPlan
+                                    }
+                                });
+                            } else {
+                                await prisma.subscriptions.create({
+                                    data: {
+                                        customerId: subscriptionId,
+                                        type: newPlan,
+                                        userId: user.id
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                break; // Ensure you add a break to exit the case
+            }
+
+            case 'customer.subscription.deleted': {
+                const subscription = await stripe.subscriptions.retrieve(data.object.id as string);
+                const subscriptionId = subscription.customer as string;
+                const userSubscription = await prisma.subscriptions.delete({
+                    where: {
+                        customerId: subscriptionId
+                    }
+                });
+
+                await prisma.user.update({
+                    where: {
+                        id: userSubscription.userId
+                    },
+                    data: {
+                        plan: "FREE"
+                    }
+                });
+                break;
+            }
+
+            default:
+                // Unhandled event type
+                console.warn(`Unhandled event type: ${eventType}`);
+        }
+    } catch (e: any) {
+        console.error('Stripe error: ' + e.message + ' | EVENT TYPE: ' + eventType);
+    }
+
+    return NextResponse.json({});
 }
