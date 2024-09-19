@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
 import Stripe from 'stripe';
+import { Readable } from 'stream';
 import prisma from '@/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -8,16 +8,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-interface StripeEvent {
-  data: {
-    object: any;
-  };
-  type: string;
+// Helper function to convert the request stream to a buffer
+async function buffer(readable: Readable): Promise<Buffer> {
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
 }
 
+// Handling the webhook event
 export async function POST(req: Request): Promise<NextResponse> {
-  const body = await req.text();
-  const signature = headers().get('stripe-signature');
+  const body = await buffer(req.body as any);
+  const signature = req.headers.get('stripe-signature');
 
   if (!signature) {
     console.error('Missing Stripe signature');
@@ -27,6 +30,7 @@ export async function POST(req: Request): Promise<NextResponse> {
   let event: Stripe.Event;
 
   try {
+    // Validate the webhook signature using the raw body and secret
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`);
@@ -39,12 +43,12 @@ export async function POST(req: Request): Promise<NextResponse> {
     switch (eventType) {
       case 'checkout.session.completed': {
         console.log('Payment completed');
-
+        
         const session = await stripe.checkout.sessions.retrieve(
           event.data.object.id,
           { expand: ['line_items', 'subscription'] }
         );
-
+        
         const customerId = session?.customer as string | undefined;
         const customer: any = customerId ? await stripe.customers.retrieve(customerId) : null;
         const priceId = session?.line_items?.data[0]?.price?.id;
