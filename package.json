@@ -10,30 +10,34 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.637.0",
-    "@clerk/nextjs": "^5.3.3",
+    "@aws-sdk/client-s3": "^3.654.0",
+    "@clerk/nextjs": "^5.6.0",
+    "@codemirror/basic-setup": "^0.20.0",
+    "@codemirror/lang-css": "^6.3.0",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.2",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/material": "^5.16.7",
+    "@mui/material": "^6.1.1",
     "@prisma/client": "^5.19.1",
-    "codemirror": "^5.65.17",
+    "codemirror": "^5.65.18",
     "material": "^0.9.15",
-    "next": "14.2.6",
-    "react": "^18",
+    "next": "^14.2.13",
+    "react": "^18.3.1",
     "react-codemirror2": "^8.0.0",
-    "react-dom": "^18",
+    "react-dom": "^18.3.1",
     "sharp": "^0.33.5",
-    "socket.io-client": "^4.7.5",
-    "stripe": "^16.8.0",
+    "socket.io-client": "^4.8.0",
+    "stripe": "^16.12.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.16.1",
-    "@types/react": "^18",
+    "@types/node": "^22.5.5",
+    "@types/react": "^18.3.8",
     "@types/react-dom": "^18",
     "@types/uuid": "^10.0.0",
     "prisma": "^5.19.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   }
 }
