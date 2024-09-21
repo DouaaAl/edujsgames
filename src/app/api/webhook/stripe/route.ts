@@ -16,10 +16,6 @@ interface StripeEvent {
     type: string;
 }
 
-export async function GET(res: NextResponse, req: Request) {
-    return NextResponse.json({"result": "success"})
-}
-
 export async function POST(req: Request): Promise<NextResponse> {
     const body = await req.text();
     const signature = headers().get('stripe-signature');
