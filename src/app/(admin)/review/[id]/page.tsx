@@ -80,6 +80,13 @@ const page = () => {
     
   }
   useEffect(()=>{
+    if (typeof window !== 'undefined') {
+      require('codemirror/lib/codemirror.css');
+      require('codemirror/theme/material.css');
+      require('codemirror/mode/xml/xml');
+      require('codemirror/mode/javascript/javascript');
+      require('codemirror/mode/css/css');
+    }
     getCurrentGame();
     checkPermissions();
   }, [])

@@ -1,13 +1,13 @@
 "use client"
 import React, { useState, useEffect } from 'react'
-import styles from "./create.module.css"
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
 import 'codemirror/mode/xml/xml'
 import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/css/css'
-import { Controlled as ControlledEditor} from 'react-codemirror2'
 import "./customize.css"
+import { Controlled as ControlledEditor} from 'react-codemirror2'
+import styles from "./create.module.css"
 import { changeGameStateServer, getGameServer, updateGameServer } from '@/actions/games'
 import { useParams } from 'next/navigation'
 import { useRouter } from 'next/navigation'
@@ -50,8 +50,15 @@ const page = () => {
     if(data?.javascript)  setJavascript(data?.javascript);
     
   }
+
   useEffect(()=>{
-    
+    if (typeof window !== 'undefined') {
+      require('codemirror/lib/codemirror.css');
+      require('codemirror/theme/material.css');
+      require('codemirror/mode/xml/xml');
+      require('codemirror/mode/javascript/javascript');
+      require('codemirror/mode/css/css');
+    }
     getCurrentGame();
   }, [])
 
