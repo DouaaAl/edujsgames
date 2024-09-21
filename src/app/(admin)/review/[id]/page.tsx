@@ -1,8 +1,4 @@
 "use client"
-import React, {useState, useEffect} from 'react'
-import styles from "./review.module.css"
-import { useParams } from 'next/navigation';
-import { changeGameStateServer, getGameServer, updateGameServer } from '@/actions/games';
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/material.css'
 import 'codemirror/mode/xml/xml'
@@ -10,6 +6,10 @@ import 'codemirror/mode/javascript/javascript'
 import 'codemirror/mode/css/css'
 import { Controlled as ControlledEditor} from 'react-codemirror2'
 import "./customize.css"
+import React, {useState, useEffect} from 'react'
+import styles from "./review.module.css"
+import { useParams } from 'next/navigation';
+import { changeGameStateServer, getGameServer, updateGameServer } from '@/actions/games';
 import PopUp from './popUp';
 import { States } from '@prisma/client';
 import { getUserMetaDataServer } from '@/actions/users';
